@@ -14,22 +14,25 @@ app.post('/send-changelog', jsonParser, async function (req, res) {
     const commitCount = req.body.commits.length
     const repoName = req.body.repository.name
 
+    let embeds = []
     let embed = new EmbedBuilder()
     .setColor('#0099ff')
     .setAuthor({ name: repoName, iconURL: 'https://cdn.discordapp.com/attachments/1192201628107939903/1197241174163980318/prismalogs-main.png?ex=65ba8cbb&is=65a817bb&hm=37e4bc06d2e059c691a75692c324e6424f6d91b63a4dbabc14153a1a86a37814&g', url: `https://github.com/${req.body.repository.full_name}` })
     .setDescription(commitCount + " nieuwe commits aan origin/master")
 
+    embeds.push(embed)
     const logsChannel = await client.channels.fetch(config.channelID);
-    await logsChannel.send({ embeds: [embed] })
+
 
     for (const commit of req.body.commits) {
       embed = new EmbedBuilder()
       .setColor('#0099ff')
       .setTitle(commit.message)
       .setFooter({ text: commit.author.name, iconURL: `https://github.com/${commit.author.username}.png` });
-      await logsChannel.send({ embeds: [embed] })
+      embeds.push(embed)
     }
-
+    
+    await logsChannel.send({ embeds })
     console.log("Succesfully send changelogs..")
 
   } catch(e) {
